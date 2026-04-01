@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { toast, Toaster } from "sonner";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -12,11 +17,74 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { RectangleStackIcon } from "@heroicons/react/16/solid";
+import { useTheme } from "next-themes";
 
 export default function SignInPage() {
+    const router = useRouter();
+    const [form, setForm] = useState({
+        email: "",
+        password: ""
+    });
+
+    const ThemeToaster = () => {
+        const { theme } = useTheme();
+        const invertedTheme = theme === "dark" ? "light" : "dark";
+
+        return (
+            <Toaster
+                position="top-center"
+                theme={invertedTheme as "dark" | "light"}
+            />
+        );
+    }
+
+    const handleChange = (e: any) => {
+        setForm({ ...form, [e.target.id]: e.target.value });
+    };
+
+    const handleSubmit = async () => {
+        if (!form.email || !form.password) {
+            toast.error("Please fill all fields");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:8080/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(form)
+            });
+
+            const data = await res.json();
+
+            if (res.status === 200) {
+                const token = data?.data?.token;
+
+                // store token
+                localStorage.setItem("token", token);
+
+                toast.success("Login successful");
+
+                // redirect
+                setTimeout(() => {
+                    router.push("/dashboard"); // change if needed
+                }, 1200);
+
+            } else {
+                toast.error(data?.message || "Invalid credentials");
+            }
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
     return (
         <main className="min-h-screen bg-background flex items-center justify-center px-4">
             <div className="w-full max-w-sm">
+
+                <ThemeToaster />
 
                 {/* Logo */}
                 <div className="flex items-center justify-center gap-2 mb-6 me-5">
@@ -37,7 +105,7 @@ export default function SignInPage() {
                         {/* Email */}
                         <div className="space-y-1.5">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" placeholder="john@example.com" />
+                            <Input id="email" type="email" placeholder="john@example.com" onChange={handleChange} />
                         </div>
 
                         {/* Password */}
@@ -45,10 +113,10 @@ export default function SignInPage() {
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="password">Password</Label>
                             </div>
-                            <Input id="password" type="password" placeholder="••••••••" />
+                            <Input id="password" type="password" placeholder="••••••••" onChange={handleChange} />
                         </div>
 
-                        <Button className="w-full" size="default">
+                        <Button className="w-full" size="default" onClick={handleSubmit}>
                             Sign In
                         </Button>
 

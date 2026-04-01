@@ -1,12 +1,69 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { toast, Toaster } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { RectangleStackIcon } from "@heroicons/react/16/solid";
+import { useTheme } from "next-themes";
 
 export default function SignUpPage() {
+    const [form, setForm] = useState({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+    });
+
+    const ThemeToaster = () => {
+        const { theme } = useTheme();
+        const invertedTheme = theme === "dark" ? "light" : "dark";
+
+        return (
+            <Toaster
+                position="top-center"
+                theme={invertedTheme as "dark" | "light"}
+            />
+        );
+    }
+
+    const handleChange = (e: any) => {
+        setForm({ ...form, [e.target.id]: e.target.value });
+    };
+
+    const handleSubmit = async () => {
+        if (form.password !== form.confirmPassword) {
+            toast.error("Passwords do not match");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://localhost:8080/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: form.name,
+                    email: form.email,
+                    password: form.password
+                })
+            });
+
+            if (res.status === 201) {
+                toast.success("User registered successfully!!");
+            } else {
+                toast.error("Email already exists");
+            }
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
     return (
         <main className="min-h-screen bg-background flex items-center justify-center px-4">
             <div className="w-full max-w-sm">
@@ -16,6 +73,8 @@ export default function SignUpPage() {
                     <RectangleStackIcon className="h-4 w-4" />
                     <span className="text-lg font-semibold text-foreground">Task Manager</span>
                 </div>
+
+                <ThemeToaster />
 
                 <Card>
                     <CardHeader className="text-center">
@@ -29,28 +88,28 @@ export default function SignUpPage() {
                         {/* Full Name */}
                         <div className="space-y-1.5">
                             <Label htmlFor="name">Full Name</Label>
-                            <Input id="name" type="text" placeholder="John Doe" />
+                            <Input id="name" type="text" placeholder="John Doe" onChange={handleChange} />
                         </div>
 
                         {/* Email */}
                         <div className="space-y-1.5">
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" type="email" placeholder="john@example.com" />
+                            <Input id="email" type="email" placeholder="john@example.com" onChange={handleChange} />
                         </div>
 
                         {/* Password */}
                         <div className="space-y-1.5">
                             <Label htmlFor="password">Password</Label>
-                            <Input id="password" type="password" placeholder="Password" />
+                            <Input id="password" type="password" placeholder="Password" onChange={handleChange} />
                         </div>
 
                         {/* Confirm Password */}
                         <div className="space-y-1.5">
-                            <Label htmlFor="confirm-password">Confirm Password</Label>
-                            <Input id="confirm-password" type="password" placeholder="Confirm Password" />
+                            <Label htmlFor="confirmPassword">Confirm Password</Label>
+                            <Input id="confirmPassword" type="password" placeholder="Confirm Password" onChange={handleChange} />
                         </div>
 
-                        <Button className="w-full" size="default">
+                        <Button className="w-full" size="default" onClick={handleSubmit}>
                             Sign Up
                         </Button>
                     </CardContent>
