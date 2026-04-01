@@ -1,5 +1,7 @@
 package com.example.taskmanagerservice.taskmanager.models;
 
+import java.util.Optional;
+
 public class APIResponse<T> {
 
     private int status;
@@ -10,6 +12,12 @@ public class APIResponse<T> {
         this.status = status;
         this.message = message;
         this.data = data;
+    }
+
+    public APIResponse(int status, String message) {
+        this.status = status;
+        this.message = message;
+        this.data = null;
     }
 
     public int getStatus() {
@@ -28,8 +36,8 @@ public class APIResponse<T> {
         this.message = message;
     }
 
-    public T getData() {
-        return data;
+    public Optional<T> getData() {
+        return Optional.ofNullable(data);
     }
 
     public void setData(T data) {
