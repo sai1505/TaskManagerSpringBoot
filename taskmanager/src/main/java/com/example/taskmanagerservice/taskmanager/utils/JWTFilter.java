@@ -13,7 +13,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-
 @Component
 public class JWTFilter extends OncePerRequestFilter {
 
@@ -43,6 +42,10 @@ public class JWTFilter extends OncePerRequestFilter {
 
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
+
+                System.out.println("HEADER: " + header);
+                System.out.println("TOKEN: " + token);
+                System.out.println("USERNAME: " + username);
 
             } catch (Exception e) {
                 SecurityContextHolder.clearContext();

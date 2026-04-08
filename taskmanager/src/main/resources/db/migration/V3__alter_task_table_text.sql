@@ -1,0 +1,1 @@
+ALTER TABLE task MODIFY description LONGTEXT;
